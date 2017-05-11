@@ -2,35 +2,39 @@ function UserInterface(game, camera){
 	this.game = game;
 	this.camera = camera;
 
-	this.camDefX = this.camera.x;
-	this.camDefY = this.camera.y;
-
+	// Creates the visual toolbar located at the bottom of the screen
 	this.toolbar = this.game.add.sprite(0, this.camera.y+this.camera.height, 'tool1');
 	this.toolbar.anchor.setTo(.5, 1);
 
+	// Refers to position of toolbar on screen. DisplaceDef is the default value.
 	this.yDisplaceDef = 4*(this.toolbar.height/5);
 	this.yDisplace = this.yDisplaceDef;
 
+	// Setting the toolbar in the correct position.
 	this.toolbar.y += this.yDisplace;
 
+	// Visual instructions for the toolbar.
 	this.instructText = this.game.add.text(0, 0, "Press E to open Menu");
 	this.instructText.anchor.setTo(.5, 1);
 
+	// Boolean to test whether or not the player has the toolbar enabled.
 	this.menuActive = false;
 
-	this.buildingArray = ['hab1x1Down', 'hab2x1LeftRight', 'commandCenter'];
+	this.buildingArray = ['hab1x1Down', 'hab1x1Right', 'hab2x1LeftRight'];
 	this.i;
 	this.icons = this.game.add.group();
+	this.icons.classType = Phaser.Button;
 
-	//this.icons.x = this.camera.width/2;
-	//this.icons.y = 0;
+	this.icons.x = this.camera.x + this.camera.width/2;
+	this.icons.y = this.camera.y + this.camera.height - this.yDisplaceDef;
 
 
 	for(this.i=0; this.i<this.buildingArray.length; this.i++){
-		//this.indivIcon = this.icons.create(0, 0, this.buildingArray[this.i]);
-		this.indivIcon = this.icons.create((this.i+1)*(this.camera.width/(1.3*this.buildingArray.length)), this.toolbar.y-this.yDisplace-(this.toolbar.height/2), this.buildingArray[this.i]);
+		this.indivIcon = this.icons.create( 2 * (this.i - Math.floor(this.buildingArray.length/2)) * (this.camera.width/(this.buildingArray.length*2)), 0, this.buildingArray[this.i]);
+		this.indivIcon.y += this.indivIcon.height;
+		//this.indivIcon = this.icons.create((this.i+1)*(this.camera.width/(1.3*this.buildingArray.length)), this.toolbar.y-this.yDisplace-(this.toolbar.height/2), this.buildingArray[this.i]);
 		this.indivIcon.anchor.setTo(.5, .5);
-		this.indivIcon.scale.setTo(1, 1);
+		this.indivIcon.scale.setTo(1.3, 1.3);
 	}
 	//this.icons.align(this.buildingArray.length, 1, 50, 50);
 	//this.icons.pivot.x = this.camera.width/2;
@@ -38,8 +42,9 @@ function UserInterface(game, camera){
 
 UserInterface.prototype.display = function(){
 	if(this.game.input.keyboard.justPressed(Phaser.Keyboard.E)){
+		// If the menu is not activated, pull it up. Otherwise, close it.
     	if(this.menuActive == false){
-    		this.game.add.tween(this).to({ yDisplace: 0 }, 300, Phaser.Easing.Default, true);
+    		this.game.add.tween(this).to({ yDisplace: 0 }, 300, Phaser.Easing.Quadratic.InOut, true);
     		this.menuActive = true;
     	} else {
     		this.game.add.tween(this).to({ yDisplace: this.yDisplaceDef }, 300, Phaser.Easing.Default, true);
@@ -47,34 +52,28 @@ UserInterface.prototype.display = function(){
     	}
     }
 
-    if(this.menuActive){
+    // This ensures that the icons only appear when the player has the toolbar enabled.
+    /*if(this.menuActive){
     	this.icons.alpha = 100;
     } else {
     	this.icons.alpha = 0;
-    }
+    }*/
 
-    if(this.camera.x != this.camDefX || this.camera.y != this.camDefY){
-    	this.icons.alpha = 0;
-    }
+    this.icons.x = this.camera.x + this.camera.width/2;
+    this.icons.y = this.camera.y + this.camera.height - (this.yDisplaceDef - this.yDisplace);
 
-	//this.camera = camera;
+	// Setting the toolbar and instruction text in the correct locations.
 	this.toolbar.x = this.camera.x + (this.camera.width/2);
 	this.toolbar.y = this.camera.y + this.camera.height + this.yDisplace;
 	this.instructText.x = this.toolbar.x;
 	this.instructText.y = this.toolbar.y-this.yDisplace;
 
-	//this.icons.x += this.camera.x;
-	//this.icons.y = this.toolbar.y-this.yDisplace-51;
-
-	if(this.yDisplace == 0){
-    	this.instructText.text = "";
-    } else if (this.yDisplace == this.yDisplaceDef){
+	// The text will disappear if the menu isn't enabled.
+	if (this.yDisplace == this.yDisplaceDef){
     	this.instructText.text = "Press E to open Menu";
     } else {
     	this.instructText.text = "";
     }
-};
 
-/*UserInterface.prototype.open = function(){
-	this.game.add.tween(this.toolbar).to({ y: 71}, Phaser.Easing.Default, true);
-};*/
+    this.icons.onInputOut
+};
