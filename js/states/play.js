@@ -19,6 +19,7 @@ Play.prototype = {
         this.load.image('hab1x1', 'Habitation1x1.png');
         this.load.image('hab2x1', 'Habitation2x1.png');
         this.load.image('habBed', 'HabitationBed.png');
+        this.load.image('foodRes', 'Foodph.png');
 
         console.log('Play: preload()');
     },
@@ -30,7 +31,7 @@ Play.prototype = {
 
         //orangish brown
         this.stage.backgroundColor = '#c1440e';
-        this.g = new Grid(this, 32, 32, 'black');
+        this.g = new Grid(this, 32, 32, 'black'); //imports a grid from grid.js using constructor
         this.g.makeGrid();
 
         //.bind(this) used to access 'this' scope within callback
@@ -44,7 +45,7 @@ Play.prototype = {
         }.bind(this);
 
         //Test building stuff :D
-        this.hab1 = new Building(this, 1,  1, 'hab1x1');
+        this.hab1 = new Building(this, 1,  1, 'hab1x1');//imports a building from grid.js using constructor
         this.hab1.x = 200;
         this.hab1.y = 200;
 
@@ -52,11 +53,15 @@ Play.prototype = {
         this.hab2.x = 0;
         this.hab2.y = 0;
 
+        this.food=new Resource(this,10,20,608,32,'foodRes');
+        this.food.fixedToCamera=true;
         //All objects added to the world will be added to the gameWorld group
         //Then, that is what will be scaled on zoom, instead of the whole world
         //I can potentially put this into the building constructors...
         this.gameWorld.add(this.hab1);
         this.gameWorld.add(this.hab2);
+        this.gameWorld.add(this.food);
+
     },
     update: function() {
         //move the camera as the mouse goes to the sides of the screen
