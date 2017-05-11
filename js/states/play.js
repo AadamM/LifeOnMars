@@ -19,6 +19,7 @@ Play.prototype = {
         this.load.image('hab1x1', 'Habitation1x1.png');
         this.load.image('hab2x1', 'Habitation2x1.png');
         this.load.image('habBed', 'HabitationBed.png');
+        this.load.image('tool1', 'Toolbar1.png')
 
         console.log('Play: preload()');
     },
@@ -32,6 +33,10 @@ Play.prototype = {
         this.stage.backgroundColor = '#c1440e';
         this.g = new Grid(this, 32, 32, 'black');
         this.g.makeGrid();
+
+        //initiates the UI
+        this.UI = new UserInterface(this, this.camera);
+        //this.game.add.existing(this.UI);
 
         //.bind(this) used to access 'this' scope within callback
         this.input.mouse.mouseWheelCallback = function() {
@@ -85,6 +90,8 @@ Play.prototype = {
         //keep the grid tileSprite centered on the camera
         this.g.gridsSpr[this.zoomLevel].x = this.camera.view.x;
         this.g.gridsSpr[this.zoomLevel].y = this.camera.view.y;
+
+        this.UI.display();
     },
     render: function() {
         //game.debug.text(game.input.worldX+', '+game.input.worldY, 200, 14, '#ffffff');
