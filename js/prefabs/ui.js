@@ -2,6 +2,9 @@ function UserInterface(game, camera){
 	this.game = game;
 	this.camera = camera;
 
+	this.camDefX = this.camera.x;
+	this.camDefY = this.camera.y;
+
 	this.toolbar = this.game.add.sprite(0, this.camera.y+this.camera.height, 'tool1');
 	this.toolbar.anchor.setTo(.5, 1);
 
@@ -15,7 +18,7 @@ function UserInterface(game, camera){
 
 	this.menuActive = false;
 
-	this.buildingArray = ['hab1x1', 'hab2x1', 'habBed'];
+	this.buildingArray = ['hab1x1Down', 'hab2x1LeftRight', 'commandCenter'];
 	this.i;
 	this.icons = this.game.add.group();
 
@@ -27,7 +30,7 @@ function UserInterface(game, camera){
 		//this.indivIcon = this.icons.create(0, 0, this.buildingArray[this.i]);
 		this.indivIcon = this.icons.create((this.i+1)*(this.camera.width/(1.3*this.buildingArray.length)), this.toolbar.y-this.yDisplace-(this.toolbar.height/2), this.buildingArray[this.i]);
 		this.indivIcon.anchor.setTo(.5, .5);
-		this.indivIcon.scale.setTo(1.7, 1.7);
+		this.indivIcon.scale.setTo(1, 1);
 	}
 	//this.icons.align(this.buildingArray.length, 1, 50, 50);
 	//this.icons.pivot.x = this.camera.width/2;
@@ -50,7 +53,7 @@ UserInterface.prototype.display = function(){
     	this.icons.alpha = 0;
     }
 
-    if(this.camera.x != 0 || this.camera.y != 0){
+    if(this.camera.x != this.camDefX || this.camera.y != this.camDefY){
     	this.icons.alpha = 0;
     }
 

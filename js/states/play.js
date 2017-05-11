@@ -17,9 +17,6 @@ Play.prototype = {
     preload: function() {
         //temporary... move to Load state
         this.load.path = 'assets/img/';
-        this.load.image('hab1x1', 'Habitation1x1.png');
-        this.load.image('hab2x1', 'Habitation2x1.png');
-        this.load.image('habBed', 'HabitationBed.png');
         this.load.image('tool1', 'Toolbar1.png')
         this.load.image('hab1x1Down', 'HabitationUnit1x1Down.png');
         this.load.image('hab2x1LeftRight', 'HabitationUnit2x1LeftRight.png');
