@@ -3,7 +3,8 @@ function UserInterface(game, camera){
 	this.camera = camera;
 
 	// Creates the visual toolbar located at the bottom of the screen
-	this.toolbar = this.game.add.sprite(0, this.camera.y+this.camera.height, 'tool1');
+	this.toolbar = this.game.add.sprite(0, this.camera.y+this.camera.height, 'buildings', 'Toolbar1');
+	this.toolbar.scale.y = .7;
 	this.toolbar.anchor.setTo(.5, 1);
 
 	// Refers to position of toolbar on screen. DisplaceDef is the default value.
@@ -15,26 +16,26 @@ function UserInterface(game, camera){
 
 	// Visual instructions for the toolbar.
 	this.instructText = this.game.add.text(0, 0, "Press E to open Menu");
-	this.instructText.anchor.setTo(.5, 1);
+	this.instructText.anchor.setTo(.5, -.1);
 
 	// Boolean to test whether or not the player has the toolbar enabled.
 	this.menuActive = false;
 
-	this.buildingArray = ['hab1x1Down', 'hab1x1Right', 'hab2x1LeftRight'];
+	this.buildingArray = ['HabitationUnit1x1Up', 'HabitationUnit2x1LeftRight', 'HabitationUnit2x2'];
 	this.i;
 	this.icons = this.game.add.group();
 	this.icons.classType = Phaser.Button;
 
 	this.icons.x = this.camera.x + this.camera.width/2;
-	this.icons.y = this.camera.y + this.camera.height - this.yDisplaceDef;
+	this.icons.y = this.toolbar.y;//this.camera.y + this.camera.height - this.yDisplaceDef;
 
 
 	for(this.i=0; this.i<this.buildingArray.length; this.i++){
-		this.indivIcon = this.icons.create( 2 * (this.i - Math.floor(this.buildingArray.length/2)) * (this.camera.width/(this.buildingArray.length*2)), 0, this.buildingArray[this.i]);
-		this.indivIcon.y += this.indivIcon.height;
+		this.indivIcon = this.icons.create( 2 * (this.i - Math.floor(this.buildingArray.length/2)) * (this.camera.width/(this.buildingArray.length*2)), 0, 'buildings', this.makeBuilding, this);		this.indivIcon.frameName = this.buildingArray[this.i];
+		this.indivIcon.y += (this.toolbar.height*this.toolbar.scale.y)/2;
 		//this.indivIcon = this.icons.create((this.i+1)*(this.camera.width/(1.3*this.buildingArray.length)), this.toolbar.y-this.yDisplace-(this.toolbar.height/2), this.buildingArray[this.i]);
 		this.indivIcon.anchor.setTo(.5, .5);
-		this.indivIcon.scale.setTo(1.3, 1.3);
+		this.indivIcon.scale.setTo(.75, .75);
 	}
 	//this.icons.align(this.buildingArray.length, 1, 50, 50);
 	//this.icons.pivot.x = this.camera.width/2;
@@ -66,14 +67,22 @@ UserInterface.prototype.display = function(){
 	this.toolbar.x = this.camera.x + (this.camera.width/2);
 	this.toolbar.y = this.camera.y + this.camera.height + this.yDisplace;
 	this.instructText.x = this.toolbar.x;
-	this.instructText.y = this.toolbar.y-this.yDisplace;
+	this.instructText.y = this.toolbar.y - this.toolbar.height;
 
-	// The text will disappear if the menu isn't enabled.
+	// The text will change depending on the state of the menu.
 	if (this.yDisplace == this.yDisplaceDef){
     	this.instructText.text = "Press E to open Menu";
     } else {
-    	this.instructText.text = "";
+    	this.instructText.text = "Press E to close Menu";
     }
+};
 
-    this.icons.onInputOut
+UserInterface.prototype.makeBuilding = function(){
+	if(this.frameName == 'HabitationUnit1x1Up'){
+		this.buttonBuilding = new Building(this.game, 1, 1, 'buildings', 'HabitationUnit1x1Down', true, [
+            'HabitationUnit1x1Left', 'HabitationUnit1x1Up', 'HabitationUnit1x1Right'
+        ]);
+		this.buttonBuilding.x = this.game.input.mousePointer.x;
+		this.buttonBuilding.y = this.game.input.mousePointer.y;
+	}
 };
