@@ -79,9 +79,13 @@ Play.prototype = {
             hall.y = 256;
         }
 
-        let corner = new Walkway(this, 1, 1, 'buildings', 'WalkwayCorner');
+        let corner = new WalkwayCorner(this, 1, 1, 'buildings', 'WalkwayCorner');
         corner.x = 200;
         corner.y = 200;
+
+        let hab2x2 = new HabUnit(this, 2, 2, 'buildings', 'HabitationUnit2x2');
+        hab2x2.x = 400;
+        hab2x2.y = 400;
     },
     update: function() {
 

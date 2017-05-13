@@ -22,8 +22,15 @@ function Building(game, w, h, key, frame) {
     //start at half resolution
     this.scale.set(.5);
 
-    this.inputEnabled = true;
+    //store each building's connection points
+    this.connections = [];
+    this.DOWN = 0;
+    this.LEFT = 1;
+    this.UP = 2;
+    this.RIGHT = 3;
+
     //give the sprite button functionality
+    this.inputEnabled = true;
 
     //This will later be changed to somewhere else
     //Because the building object should be created
@@ -64,11 +71,23 @@ Building.prototype.placed = function() {
     this.x = xPos * 32;
     this.y = yPos * 32;
 
-    //update cell info here
-    for (let i = xPos; i < xPos + this.w; i++) {
-        for (let j = yPos; j < yPos + this.h; j++) {
-            this.game.g.cells[i][j].occupied = true;
-        }
+    // //update cell info here
+    // for (let i = xPos; i < xPos + this.w; i++) {
+    //     for (let j = yPos; j < yPos + this.h; j++) {
+    //         this.game.g.cells[i][j].occupied = true;
+    //     }
+    // }
+
+    this.connections.splice(this.deleteIndex, 1);
+    this.gridDeleteIndex.connect = -1;
+
+    for (let i = 0; i < this.connections.length; i++) {
+        let num = this.connections[i][0];
+        let x = Math.floor(num / 10);
+        let y = num % 10;
+
+        this.game.g.cells[x + xPos][y + yPos].connect = this.connections[i][1];
+        console.log('cell: (' + (x + xPos) + ', ' + (y + yPos) + ') = ' + this.connections[i][1]);
     }
 
     this.game.g.bmdOverlay.clear();
@@ -88,18 +107,53 @@ Building.prototype.update = function() {
         var yPos = this.game.g.yStart + this.game.g.upperLeftColumn;
         var highlightColor = '#66ff33';
         var opacity = .25;
+        var canPlace = false;
         this.events.onInputDown.active = true;
 
+
+        //TODO: 
+        //-find a better solution for this pls :/
+        this.deleteIndex = -1;
+        this.gridDeleteIndex = this.game.g.cells[0][0];
+
         if (xPos && yPos) {
-            for (let i = xPos; i < xPos + this.w; i++) {
-                for (let j = yPos; j < yPos + this.h; j++) {
-                    if (this.game.g.cells[i][j].occupied) {
-                        highlightColor = '#facade';
-                        opacity = .5;
-                        this.events.onInputDown.active = false;
+            for (let i = 0; i < this.connections.length; i++) {
+                let num = this.connections[i][0];
+                let x = Math.floor(num / 10);
+                let y = num % 10;
+
+                if (this.connections[i][1] === this.UP) {
+                    if (this.game.g.cells[x + xPos][y + yPos - 1].connect === this.DOWN) {
+                        canPlace = true;
+                        this.deleteIndex = i;
+                        this.gridDeleteIndex = this.game.g.cells[x + xPos][y + yPos - 1];
+                    }
+                } else if (this.connections[i][1] === this.DOWN) {
+                    if (this.game.g.cells[x + xPos][y + yPos + 1].connect === this.UP) {
+                        canPlace = true;
+                        this.deleteIndex = i;
+                        this.gridDeleteIndex = this.game.g.cells[x + xPos][y + yPos + 1];
+                    }
+                } else if (this.connections[i][1] === this.LEFT) {
+                    if (this.game.g.cells[x + xPos - 1][y + yPos].connect === this.RIGHT) {
+                        canPlace = true;
+                        this.deleteIndex = i;
+                        this.gridDeleteIndex = this.game.g.cells[x + xPos - 1][y + yPos];
+                    }
+                } else {
+                    if (this.game.g.cells[x + xPos + 1][y + yPos].connect === this.LEFT) {
+                        canPlace = true;
+                        this.deleteIndex = i;
+                        this.gridDeleteIndex = this.game.g.cells[x + xPos + 1][y + yPos];
                     }
                 }
             }
+        }
+
+        if (!canPlace) {
+            opacity = .5;
+            highlightColor = '#facade';
+            this.events.onInputDown.active = true;
         }
 
         this.game.g.draw(this.w, this.h, opacity, highlightColor);
@@ -144,8 +198,9 @@ function Walkway(game, w, h, key, frame) {
         x: 0,
         y: 0
     };
-    //0 = down, 1 = left, 2 = up, 3 = right
-    this.rotation = 0;
+
+    this.connections.push([0, this.DOWN]);
+    this.connections.push([0, this.UP]);
 }
 
 Walkway.prototype = Object.create(RotatableBuilding.prototype);
@@ -153,38 +208,63 @@ Walkway.prototype.constructor = Walkway;
 
 Walkway.prototype.rotate = function() {
     if (this.held) {
+        if (this.angle === 0) {
+            this.angle = 90;
+            this.orientation.y = 1;
+            this.connections[0][0].left = false;
+            this.connections[0][0].right = false;
+            this.connections[0][0].up = true;
+            this.connections[0][0].down = true;
+        } else {
+            this.angle = 0;
+            this.orientation.y = 0;
+            this.connections[0][0].left = true;
+            this.connections[0][0].right = true;
+            this.connections[0][0].up = false;
+            this.connections[0][0].down = false;
+        }
+    }
+};
 
+function WalkwayCorner(game, w, h, key, frame) {
+    Walkway.call(this, game, w, h, key, frame);
+    this.connections[1] = [0, this.LEFT];
+}
+
+WalkwayCorner.prototype = Object.create(Walkway.prototype);
+WalkwayCorner.prototype.constructor = WalkwayCorner;
+
+WalkwayCorner.prototype.rotate = function() {
+    if (this.held) {
         this.angle += 90;
 
         if (this.orientation.x === 0 && this.orientation.y === 0) {
             this.orientation.y = 1;
+            this.connections[0][0].down = false;
+            this.connections[0][0].up = true;
         } else if (this.orientation.x > 0 && this.orientation.y === 0) {
             this.orientation.x = 0;
+            this.connections[0][0].right = false;
+            this.connections[0][0].left = true;
         } else if (this.orientation.y > 0 && this.orientation.x === 0) {
             this.orientation.x = 1;
+            this.connections[0][0].left = false;
+            this.connections[0][0].right = true;
         } else {
             this.orientation.y = 0;
+            this.connections[0][0].up = false;
+            this.connections[0][0].down = true;
         }
-
-    }
-};
-
-/**
- * @override Building.prototype.changeType
- */
-Walkway.prototype.changeType = function() {
-    var cells = this.game.g.cells;
-    var xPos = this.x / 32;
-    var yPos = this.y / 32;
-
-    if (cells[xPos - 1][yPos].connects.right && cells[xPos][yPos - 1].connects.down) {
-
-        this.frameName = 'WalkwayTShape';
     }
 };
 
 function CommandCenter(game, w, h, key, frame) {
     Building.call(this, game, w, h, key, frame);
+
+    this.connections.push([10, this.UP]);
+    this.connections.push([21, this.RIGHT]);
+    this.connections.push([12, this.DOWN]);
+    this.connections.push([1, this.LEFT]);
 }
 
 CommandCenter.prototype = Object.create(Building.prototype);
@@ -195,6 +275,18 @@ CommandCenter.prototype.constructor = CommandCenter;
  */
 function HabUnit(game, w, h, key, frame, otherFrames) {
     RotatableBuilding.call(this, game, w, h, key, frame, otherFrames);
+
+    if (otherFrames) {
+        this.connections.push([0, this.DOWN]);
+        if (w > 1) {
+            this.connections.push([10, this.UP]);
+        }
+    } else {
+        this.connections.push([0, this.LEFT]);
+        this.connections.push([10, this.UP]);
+        this.connections.push([11, this.RIGHT]);
+        this.connections.push([1, this.DOWN]);
+    }
 }
 
 HabUnit.prototype = Object.create(RotatableBuilding.prototype);
