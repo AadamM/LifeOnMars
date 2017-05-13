@@ -21,7 +21,7 @@ function UserInterface(game, camera){
 	// Boolean to test whether or not the player has the toolbar enabled.
 	this.menuActive = false;
 
-	this.buildingArray = ['HabitationUnit1x1Up', 'HabitationUnit2x1LeftRight', 'HabitationUnit2x2'];
+	this.buildingArray = ['HabitationUnit1x1Up', 'HabitationUnit2x1LeftRight', 'CommandCenter3x3'];
 	this.i;
 	this.icons = this.game.add.group();
 	this.icons.classType = Phaser.Button;
@@ -29,16 +29,20 @@ function UserInterface(game, camera){
 	this.icons.x = this.camera.x + this.camera.width/2;
 	this.icons.y = this.toolbar.y;//this.camera.y + this.camera.height - this.yDisplaceDef;
 
-
 	for(this.i=0; this.i<this.buildingArray.length; this.i++){
-		this.indivIcon = this.icons.create( 2 * (this.i - Math.floor(this.buildingArray.length/2)) * (this.camera.width/(this.buildingArray.length*2)), 0, 'buildings', this.makeBuilding, this);		this.indivIcon.frameName = this.buildingArray[this.i];
+		this.indivIcon = this.icons.create( 2 * (this.i - Math.floor(this.buildingArray.length/2)) * (this.camera.width/(this.buildingArray.length*2)), 0, 'buildings');
+		this.indivIcon.frameName = this.buildingArray[this.i];
+		this.indivIcon.onInputDown.add(this.makeBuilding, this, 0, this.indivIcon);	
 		this.indivIcon.y += (this.toolbar.height*this.toolbar.scale.y)/2;
 		//this.indivIcon = this.icons.create((this.i+1)*(this.camera.width/(1.3*this.buildingArray.length)), this.toolbar.y-this.yDisplace-(this.toolbar.height/2), this.buildingArray[this.i]);
 		this.indivIcon.anchor.setTo(.5, .5);
-		this.indivIcon.scale.setTo(.75, .75);
+		this.indivIcon.scale.setTo(.45, .45);
 	}
+
 	//this.icons.align(this.buildingArray.length, 1, 50, 50);
 	//this.icons.pivot.x = this.camera.width/2;
+
+
 }
 
 UserInterface.prototype.display = function(){
@@ -77,12 +81,25 @@ UserInterface.prototype.display = function(){
     }
 };
 
-UserInterface.prototype.makeBuilding = function(){
-	if(this.frameName == 'HabitationUnit1x1Up'){
+UserInterface.prototype.makeBuilding = function(indivIcon){
+	this.indivIcon = indivIcon;
+	this.frame = this.indivIcon._frame.name;
+
+	//console.log(this.indivIcon._frame.name);
+
+	if(this.frame == 'HabitationUnit1x1Up'){
 		this.buttonBuilding = new Building(this.game, 1, 1, 'buildings', 'HabitationUnit1x1Down', true, [
             'HabitationUnit1x1Left', 'HabitationUnit1x1Up', 'HabitationUnit1x1Right'
         ]);
-		this.buttonBuilding.x = this.game.input.mousePointer.x;
-		this.buttonBuilding.y = this.game.input.mousePointer.y;
-	}
+    } else if (this.frame == 'HabitationUnit2x1LeftRight') {
+    	this.buttonBuilding = new Building(this.game, 2, 1, 'buildings', 'HabitationUnit2x1LeftRight', true, [
+            'HabitationUnit2x1UpDown'
+        ]);
+    } else if (this.frame == 'CommandCenter3x3'){
+    	this.buttonBuilding = new Building(this.game, 3, 3, 'buildings', 'CommandCenter3x3');
+    }
+    this.buttonBuilding.x = this.game.input.mousePointer.x;
+	this.buttonBuilding.y = this.game.input.mousePointer.y;
+	this.buttonBuilding.held = true;
+	//console.log(this.buttonBuilding.held);
 };
